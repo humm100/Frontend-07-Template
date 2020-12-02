@@ -34,28 +34,35 @@
             [0, 0, 0]
         ]
         let color = 1;
-        function show(){
-            let dom_board = document.getElementById('board');
-            dom_board.innerHTML = '';
+        let dom_board = document.getElementById('board');
+
+        //初始化棋盘
+        function init(){
             for(let i = 0; i < 3; i++){
                 for(let j = 0; j < 3; j++){
                     let cell = document.createElement('div');
                     cell.classList.add('cell');
-                    cell.innerText = 
-                        pattern[i][j] === 2 ? '❌' : 
-                        pattern[i][j] === 1 ? '⭕' : '';
-                    cell.addEventListener('click',()=>move(j,i))
+                    cell.addEventListener('click',()=>move(cell,j,i))
+                    fill(cell,i,j)
                     dom_board.appendChild(cell);
                 }
             }
         }
-
-        function move(x,y){
-            if(color===0){
+        //填充棋子
+        function fill(cell,i,j){
+            cell.innerText = 
+                pattern[i][j] === 2 ? '❌' : 
+                pattern[i][j] === 1 ? '⭕' : '';
+        }
+        //点击落子
+        function move(cell,x,y){
+            //防止重复落子覆盖已有棋子
+            if(pattern[y][x] > 0){
                 return false;
             }
             pattern[y][x] = color;
-            show();
+            console.log(cell);
+            fill(cell,y,x);
             if(check()){
                 setTimeout(()=>{
                     alert(color === 2 ? '❌赢了!':'⭕赢了!');
@@ -131,12 +138,7 @@
 
         }
 
-
-
-
-
-
-        show(pattern)
+        init(pattern)
 
     </script>
 </body>
