@@ -61,19 +61,23 @@
                 return false;
             }
             pattern[y][x] = color;
-            console.log(cell);
             fill(cell,y,x);
-            if(check()){
+            if(check(pattern,color)){
                 setTimeout(()=>{
                     alert(color === 2 ? '❌赢了!':'⭕赢了!');
                     color = 0;
                 },20)
             }else{
                 color = 3 - color;
+                if(willWin(pattern,color)){
+                    var tip = color === 2 ? '❌要赢了!':'⭕要赢了!';
+                    console.log(tip);
+                }
             }
+            
         }
 
-        function check(){
+        function check(pattern,color){
 
             //每一种情况，判断只要有不同的就标识 win = false，并退出该层循环
 
@@ -136,6 +140,31 @@
             return false;
 
 
+        }
+
+
+        function clone(pattern){
+            return JSON.parse(JSON.stringify(pattern));
+        }
+
+
+        function willWin(pattern,color){
+            for(let i = 0; i < 3; i++){
+                for(let j = 0; j < 3; j++){
+                    if(pattern[i][j]) {
+                        continue;
+                    }
+
+                    let temp = clone(pattern);
+                    temp[i][j] = color;
+
+                    if(check(temp,color)){
+                        return true;
+                    }
+
+                }
+            }
+            return true;
         }
 
         init(pattern)
