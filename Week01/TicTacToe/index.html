@@ -42,7 +42,7 @@
                 for(let j = 0; j < 3; j++){
                     let cell = document.createElement('div');
                     cell.classList.add('cell');
-                    cell.addEventListener('click',()=>move(cell,j,i))
+                    cell.addEventListener('click',()=>userMove(cell,j,i))
                     fill(cell,i,j)
                     dom_board.appendChild(cell);
                 }
@@ -79,6 +79,61 @@
             
         }
 
+        function userMove(cell,x,y){
+            if(pattern[y][x] > 0){
+                return false;
+            }
+            pattern[y][x] = color;
+            fill(cell,y,x);
+
+            console.log(pattern)
+            if(check(pattern,color)){
+                setTimeout(()=>{
+                    alert(color === 2 ? '❌赢了!':'⭕赢了!');
+                    color = 0;
+                },20)
+            }else{
+                color = 3 - color;
+                //console.log(bestChoice(pattern, color))
+
+
+                computerMove();
+
+                /*if(willWin(pattern,color)){
+                    var tip = color === 2 ? '❌要赢了!':'⭕要赢了!';
+                    console.log(tip);
+                }*/
+            }
+        }
+
+        function computerMove(){
+            
+            let choice = bestChoice(pattern, color);
+            if(choice.point){
+                
+                let x = choice.point[0];
+                let y = choice.point[1];
+
+                pattern[y][x] = color;
+                console.log(choice)
+                let cell = dom_board.children[3*y + x];
+                
+                fill(cell, y, x);
+
+                
+                
+                if(check(pattern,color)){
+                    setTimeout(()=>{
+                        alert(color === 2 ? '❌赢了!':'⭕赢了!');
+                        color = 0;
+                    },20)
+                }else{
+                    color = 3 - color;
+                }
+
+            }
+
+        }
 
 
 
@@ -150,8 +205,8 @@
 
 
         function clone(pattern){
-            //return JSON.parse(JSON.stringify(pattern));
-            return Object.create(pattern);
+            return JSON.parse(JSON.stringify(pattern));
+            //return Object.create(pattern);
         }
 
 
@@ -196,7 +251,7 @@
                     let r = bestChoice(temp, 3 - color).result;
                     if( - r > result){
                         result = - r;
-                        point = [j, ]
+                        point = [j, i]
                     }
                 }
             }
