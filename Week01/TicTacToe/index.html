@@ -29,7 +29,7 @@
 
     <script>
         let pattern = [
-            [2, 0, 0],
+            [0, 0, 0],
             [0, 0, 0],
             [0, 0, 0]
         ]
@@ -69,13 +69,19 @@
                 },20)
             }else{
                 color = 3 - color;
-                if(willWin(pattern,color)){
+                console.log(bestChoice(pattern, color))
+
+                /*if(willWin(pattern,color)){
                     var tip = color === 2 ? '❌要赢了!':'⭕要赢了!';
                     console.log(tip);
-                }
+                }*/
             }
             
         }
+
+
+
+
 
         function check(pattern,color){
 
@@ -144,7 +150,8 @@
 
 
         function clone(pattern){
-            return JSON.parse(JSON.stringify(pattern));
+            //return JSON.parse(JSON.stringify(pattern));
+            return Object.create(pattern);
         }
 
 
@@ -159,13 +166,51 @@
                     temp[i][j] = color;
 
                     if(check(temp,color)){
-                        return true;
+                        return [j,i];
                     }
 
                 }
             }
-            return true;
+            return null;
         }
+
+
+        function bestChoice(pattern, color){
+            let p;
+            if(p = willWin(pattern, color)){
+                return {
+                    point: p,
+                    result: 1
+                }
+            }
+
+            let result = -2;
+            let point = null;
+            for(let i = 0; i < 3; i++){
+                for(let j = 0; j < 3; j++){
+                    if(pattern[i][j]){
+                        continue;
+                    }
+                    let temp = clone(pattern);
+                    temp[i][j] = color;
+                    let r = bestChoice(temp, 3 - color).result;
+                    if( - r > result){
+                        result = - r;
+                        point = [j, ]
+                    }
+                }
+            }
+
+            if(!point){
+                result = 0;
+            }
+
+            return {
+                point,
+                result
+            }
+        }
+
 
         init(pattern)
 
