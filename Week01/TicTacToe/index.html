@@ -165,7 +165,7 @@
 
             {
                 let win = true;
-                for(let j = 0; j < 3; j++){
+                for(let j = 0; j < boardNum; j++){
                     if(pattern[ boardNum * j + j ] !== color){
                         win = false;
                         break;
@@ -192,7 +192,7 @@
         function willWin(pattern,color){
             for(let i = 0; i < boardNum; i++){
                 for(let j = 0; j < boardNum; j++){
-                    if(pattern[ boardNum * i + j ]) {
+                    if(pattern[ boardNum * i + j ] !== 0) {
                         continue;
                     }
 
@@ -221,7 +221,7 @@
             let result = -1;
             outer:for(let i = 0; i < boardNum; i++){
                 for(let j = 0; j < boardNum; j++){
-                    if(pattern[ boardNum * i + j ]){
+                    if(pattern[ boardNum * i + j ] !==0 ){
                         continue;
                     }
                     let temp = clone(pattern);
@@ -240,7 +240,7 @@
 
             return {
                 point,
-                result
+                result: point ? result : 0
             }
         }
 
