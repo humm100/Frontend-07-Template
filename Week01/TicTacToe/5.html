@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五子棋</title>
+    <style>
+        #board{
+            display: grid;
+        }
+
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: green;
+            border: solid 1px #fff;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 100%;
+
+        }
+    </style>
+</head>
+<body>
+
+    <div id="board"></div>
+
+    <script>
+        //可配置棋盘
+        let pattern = [];
+        let boardNum = 15;  // 棋盘路数ß
+        let winNum = 5;     // 连子数
+        let color = 1;      //先手方  1为 ⭕ 2为 ❌
+        let dom_board = document.getElementById('board');
+        //初始化棋盘
+        function init(){
+            let template = '';
+            let w = 50;
+            for(let i = 0; i < boardNum  ; i++){
+                template += ' auto';
+                for(let j = 0; j < boardNum; j++){
+                    pattern.push(0);
+                    let cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.style.width = w + 'px';
+                    cell.style.height = w + 'px';
+                    cell.addEventListener('click',()=>userMove(j, i));
+                    //fill(j, i)
+                    dom_board.appendChild(cell);
+                }
+            }
+            dom_board.style.width = w * boardNum + 'px';
+            dom_board.style.gridTemplateColumns = template;
+            dom_board.style.gridTemplateRows = template;
+        }
+
+
+        function  getIndex(x, y) {
+            return boardNum * y + x;
+        }
+
+        //填充棋子
+        function fill(x, y){
+            let index = getIndex(x, y);
+            let color = pattern[ index ];
+            if(color > 0){
+                let cell = dom_board.children[index];
+                cell.innerText = color === 2 ? '❌' : color === 1 ? '⭕' : '';
+            }
+        }
+
+        function userMove(x, y){
+
+            let index = getIndex(x, y);
+            if(pattern[ index ] > 0){
+                return false;
+            }
+            pattern[ index ] = color;
+            fill(x, y);
+            if(check(pattern,color,x,y)){
+                setTimeout(()=>{
+                    alert(color === 2 ? '❌赢了!':'⭕赢了!');
+                    color = 0;
+                },20)
+            }else{
+                color = 3 - color;
+                //computerMove();
+            }
+        }
+
+        function computerMove(){
+
+            let choice = bestChoice(pattern, color);
+            if(choice.point){
+                let x = choice.point[0];
+                let y = choice.point[1];
+
+                let index = getIndex(x, y);
+
+                pattern[ index ] = color;
+                
+                fill(x, y);
+
+                if(check(pattern,color)){
+                    setTimeout(()=>{
+                        alert(color === 2 ? '❌赢了!':'⭕赢了!');
+                        color = 0;
+                    },20)
+                }else{
+                    color = 3 - color;
+                    //console.log(willWin(pattern, color))
+                }
+
+            }
+
+        }
+
+        
+        /**
+         * @description: 搜索当前相同棋子的数量
+         * @param {*} pattern 棋盘数据数组
+         * @param {*} color 当前棋子颜色
+         * @param {*} x 当前落子X坐标
+         * @param {*} y 当前落子Y坐标
+         * @param {*} m 当前已搜索数量，包括当前落子
+         * @param {*} dirX x 轴方向 （-1，0，1）
+         * @param {*} dirY y 轴方向 （-1，0，1）
+         * @return {*} 返回搜索到的数量
+         */        
+        function searchGetCount(pattern,color,x,y,m,dirX,dirY){
+            if(m>=winNum){
+                return m;
+            }
+            let n = m;
+            for(let i = 1; i <= winNum - m ; i++){
+                let x1 = x + dirX * i;
+                let y1 = y + dirY * i; 
+
+                if(x1 < 0 || x1 >= boardNum || y1 < 0 || y1 >= boardNum){
+                    break;
+                }
+                let index = getIndex(x1,y1);
+                if(pattern[ index ] !== color){
+                    break;
+                }else{
+                    n++;
+                }
+            }
+            return n;
+        }
+
+        // 行搜索
+        function searchRow(pattern,color,x,y){
+            var n = 1;
+            // 向左搜索
+            n = searchGetCount(pattern,color,x,y,n,-1,0);
+            // 向右搜索
+            n = searchGetCount(pattern,color,x,y,n,1,0);
+            return n;
+        }
+
+        // 列搜索
+        function searchCol(pattern,color,x,y){
+            var n = 1;
+            // 向左搜索
+            n = searchGetCount(pattern,color,x,y,n,0,-1);
+            // 向右搜索
+            n = searchGetCount(pattern,color,x,y,n,0,1);
+            return n;
+        }
+
+        // 正斜搜索
+        function searcheAngle1(pattern,color,x,y){
+            var n = 1;
+            // 向左搜索
+            n = searchGetCount(pattern,color,x,y,n,-1,-1);
+            // 向右搜索
+            n = searchGetCount(pattern,color,x,y,n,1,1);
+            return n;
+        }
+
+        // 反斜搜索
+        function searcheAngle2(pattern,color,x,y){
+            var n = 1;
+            // 向左搜索
+            n = searchGetCount(pattern,color,x,y,n,1,-1);
+            // 向右搜索
+            n = searchGetCount(pattern,color,x,y,n,-1,1);
+            return n;
+        }
+
+        // 胜负判定
+        function check(pattern,color,x,y){
+
+            if(searchRow(pattern,color,x,y) >= winNum)
+                return true;
+            
+            if(searchCol(pattern,color,x,y) >= winNum)
+                return true;
+            
+            if(searcheAngle1(pattern,color,x,y) >= winNum)
+                return true;
+
+            if(searcheAngle2(pattern,color,x,y) >= winNum)
+                return true;
+
+            return false;
+        }
+
+
+        function clone(pattern){
+            //return JSON.parse(JSON.stringify(pattern));
+            return Object.create(pattern);
+        }
+
+
+        function willWin(pattern,color){
+            for(let i = 0; i < boardNum; i++){
+                for(let j = 0; j < boardNum; j++){
+                    if(pattern[ boardNum * i + j ] !== 0) {
+                        continue;
+                    }
+
+                    let temp = clone(pattern);
+                    temp[ boardNum * i + j ] = color;
+
+                    if(check(temp,color)){
+                        return [j,i];
+                    }
+
+                }
+            }
+            return null;
+        }
+
+
+        function bestChoice(pattern, color){
+            let point = willWin(pattern, color);
+            if(point){
+                return {
+                    point,
+                    result: 1
+                }
+            }
+
+            let result = -1;
+            outer:for(let i = 0; i < boardNum; i++){
+                for(let j = 0; j < boardNum; j++){
+                    if(pattern[ boardNum * i + j ] !==0 ){
+                        continue;
+                    }
+                    let temp = clone(pattern);
+                    temp[ boardNum * i + j ] = color;
+                    let opp = bestChoice(temp, 3 - color);
+                    if( - opp.result >= result){
+                        point = [j, i];
+                        result = - opp.result;
+
+                    }
+                    if(result == 1){
+                        break outer;
+                    }
+                }
+            }
+
+            return {
+                point,
+                result: point ? result : 0
+            }
+        }
+
+
+        init()
+
+    </script>
+</body>
+</html>
