@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        let object = {
+            a: 1,
+            b: 2
+        }
+
+        let po = new Proxy(object,{
+            set(obj, prop, val){
+                console.log(obj, prop, val)
+            }
+        });
+
+        po.a = 10;
+
+        //执行对象的赋值会触发Proxy里的set勾子事件
+        //只能通过Proxy包装后的对象才了这个监测特性
+        //对原来的object操作是不会产生监测的
+
+ 
+    </script>
+</body>
+</html>
